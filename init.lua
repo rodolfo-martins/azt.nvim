@@ -659,8 +659,11 @@ require('lazy').setup({
       --  By default, Neovim doesn't support everything that is in the LSP specification.
       --  When you add blink.cmp, luasnip, etc. Neovim now has *more* capabilities.
       --  So, we create new capabilities with blink.cmp, and then broadcast that to the servers.
-      local capabilities = require('blink.cmp').get_lsp_capabilities()
+      local capabilities = vim.lsp.protocol.make_client_capabilities()
 
+      capabilities = require('blink.cmp').get_lsp_capabilities(capabilities)
+
+      capabilities.textDocument.completion.completionItem.snippetSupport = true
       -- Enable the following language servers
       --  Feel free to add/remove any LSPs that you want here. They will automatically be installed.
       --
@@ -683,7 +686,41 @@ require('lazy').setup({
         -- But for many setups, the LSP (`ts_ls`) will work just fine
         -- ts_ls = {},
         --
-
+        html = {
+          cmd = { 'vscode-html-language-server', '--stdio' },
+          filetypes = { 'html', 'templ', 'htm', 'php' },
+          capabilities = { capabilities },
+          init_options = {
+            configurationSection = { 'html', 'css', 'javascript' },
+            embeddedLanguages = {
+              css = true,
+              javascript = true,
+            },
+            provideFormatter = true,
+          },
+          root_markers = { 'package.json', '.git' },
+          settings = {},
+        },
+        cssls = {
+          cmd = { 'vscode-css-language-server', '--stdio' },
+          filetypes = { 'css', 'scss', 'less' },
+          capabilities = { capabilities },
+          init_options = {
+            provideFormatter = true,
+          },
+          root_markers = { 'package.json', '.git' },
+          settings = {
+            css = {
+              validate = true,
+            },
+            less = {
+              validate = true,
+            },
+            scss = {
+              validate = true,
+            },
+          },
+        },
         lua_ls = {
           -- cmd = { ... },
           -- filetypes = { ... },
@@ -799,12 +836,12 @@ require('lazy').setup({
           -- `friendly-snippets` contains a variety of premade snippets.
           --    See the README about individual language/framework/plugin snippets:
           --    https://github.com/rafamadriz/friendly-snippets
-          -- {
-          --   'rafamadriz/friendly-snippets',
-          --   config = function()
-          --     require('luasnip.loaders.from_vscode').lazy_load()
-          --   end,
-          -- },
+          {
+            'rafamadriz/friendly-snippets',
+            config = function()
+              require('luasnip.loaders.from_vscode').lazy_load()
+            end,
+          },
         },
         opts = {},
       },
@@ -868,7 +905,7 @@ require('lazy').setup({
       -- By default, we use the Lua implementation instead, but you may enable
       -- the rust implementation via `'prefer_rust_with_warning'`
       --
-      -- See :h blink-cmp-config-fuzzy for more information
+      -- See :h blink-cmp-config-fuzzy:h blink-cmp-config-fuzzy for more information
       fuzzy = { implementation = 'lua' },
 
       -- Shows a signature help window while you type arguments for a function
@@ -984,7 +1021,7 @@ require('lazy').setup({
   --    This is the easiest way to modularize your config.
   --
   --  Uncomment the following line and add your plugins to `lua/custom/plugins/*.lua` to get going.
-  -- { import = 'custom.plugins' },
+  { import = 'custom.plugins' },
   --
   -- For additional information with loading, sourcing and examples see `:help lazy.nvim-🔌-plugin-spec`
   -- Or use telescope!
