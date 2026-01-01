@@ -685,7 +685,7 @@ require('lazy').setup({
         --
         -- But for many setups, the LSP (`ts_ls`) will work just fine
         -- ts_ls = {},
-        --
+        jdtls = {},
         html = {
           cmd = { 'vscode-html-language-server', '--stdio' },
           filetypes = { 'html', 'templ', 'htm', 'php' },
@@ -759,6 +759,11 @@ require('lazy').setup({
       require('mason-lspconfig').setup {
         ensure_installed = {}, -- explicitly set to an empty table (Kickstart populates installs via mason-tool-installer)
         automatic_installation = false,
+        automatic_enable = {
+          exclude = {
+            'jdtls',
+          },
+        },
         handlers = {
           function(server_name)
             local server = servers[server_name] or {}
@@ -812,6 +817,10 @@ require('lazy').setup({
         -- javascript = { "prettierd", "prettier", stop_after_first = true },
       },
     },
+  },
+
+  {
+    'mfussenegger/nvim-jdtls',
   },
 
   { -- Autocompletion
@@ -1047,6 +1056,16 @@ require('lazy').setup({
       lazy = '💤 ',
     },
   },
+})
+
+vim.api.nvim_create_autocmd('FileType', {
+  pattern = 'java',
+  callback = function()
+    vim.opt_local.tabstop = 2
+    vim.opt_local.shiftwidth = 2
+
+    require('lsp.jdtls').setup()
+  end,
 })
 
 -- The line beneath this is called `modeline`. See `:help modeline`
