@@ -664,36 +664,6 @@ require('lazy').setup({
         },
       }
 
-      -- Força o fechamento de linha em QUALQUER janela flutuante do LSP
-      vim.api.nvim_create_autocmd('LspTokenize', { -- Evento genérico para capturar a renderização
-        callback = function()
-          -- Itera sobre todas as janelas abertas
-          for _, win in ipairs(vim.api.nvim_list_wins()) do
-            local config = vim.api.nvim_win_get_config(win)
-            -- Se a janela for flutuante (relative ~= "")
-            if config.relative ~= '' then
-              vim.wo[win].wrap = true
-              vim.wo[win].linebreak = true
-              -- Limita a largura da janela para 60% da sua tela para garantir o wrap
-              local max_w = math.floor(vim.o.columns * 0.6)
-              if config.width > max_w then
-                vim.api.nvim_win_set_config(win, { width = max_w })
-              end
-            end
-          end
-        end,
-      })
-
-      -- Fix específico para os Handlers do Kickstart/LSP
-      local _hover = vim.lsp.handlers['textDocument/hover']
-      vim.lsp.handlers['textDocument/hover'] = function(err, result, ctx, config)
-        config = config or {}
-        config.wrap = true
-        config.max_width = math.floor(vim.o.columns * 0.7)
-        config.border = 'rounded'
-        return _hover(err, result, ctx, config)
-      end
-
       -- LSP servers and clients are able to communicate to each other what features they support.
       --  By default, Neovim doesn't support everything that is in the LSP specification.
       --  When you add blink.cmp, luasnip, etc. Neovim now has *more* capabilities.
